@@ -2883,11 +2883,14 @@ describe('MCPConnectionFactory', () => {
       },
     );
 
-    it('coalesces rejection persistence and never redeems after its silent-refresh budget expires', async () => {
+    it('coalesces the common storage refresh while timing out its local waiters', async () => {
       jest.useFakeTimers();
       let releaseRejection!: () => void;
       const blocked = new Promise<void>((resolve) => (releaseRejection = resolve));
-      mockMCPTokenStorage.markAuthorizationRejected.mockImplementationOnce(() => blocked);
+      mockMCPTokenStorage.forceRefreshTokens.mockImplementationOnce(async () => {
+        await blocked;
+        return null;
+      });
       const factory = new InspectableMCPConnectionFactory(
         {
           serverName: 'test-server',
@@ -2910,14 +2913,16 @@ describe('MCPConnectionFactory', () => {
         const second = factory.attemptSilentTokenRefreshForTest('rejected-generation');
         void first.catch(() => undefined);
         void second.catch(() => undefined);
-        expect(mockMCPTokenStorage.markAuthorizationRejected).toHaveBeenCalledTimes(1);
-        expect(mockMCPTokenStorage.forceRefreshTokens).not.toHaveBeenCalled();
+        expect(mockMCPTokenStorage.forceRefreshTokens).toHaveBeenCalledTimes(1);
+        expect(mockMCPTokenStorage.forceRefreshTokens).toHaveBeenCalledWith(
+          expect.objectContaining({ rejectedCredentialSetId: 'rejected-generation' }),
+        );
         await jest.advanceTimersByTimeAsync(2001);
         await expect(first).rejects.toMatchObject({ name: 'MCPTokenRefreshUnavailableError' });
         await expect(second).rejects.toMatchObject({ name: 'MCPTokenRefreshUnavailableError' });
         releaseRejection();
         await jest.advanceTimersByTimeAsync(0);
-        expect(mockMCPTokenStorage.forceRefreshTokens).not.toHaveBeenCalled();
+        expect(mockMCPTokenStorage.forceRefreshTokens).toHaveBeenCalledTimes(1);
       } finally {
         releaseRejection();
         jest.useRealTimers();
@@ -3472,7 +3477,10 @@ describe('MCPConnectionFactory', () => {
         mockMCPTokenStorage.markAuthorizationRejected.mock.calls.map(
           ([params]) => params.credentialSetId,
         ),
-      ).toEqual(['original-generation', 'refreshed-generation', 'interactive-generation']);
+      ).toEqual(['refreshed-generation', 'interactive-generation']);
+      expect(mockMCPTokenStorage.forceRefreshTokens).toHaveBeenCalledWith(
+        expect.objectContaining({ rejectedCredentialSetId: 'original-generation' }),
+      );
 
       expect(mockMCPTokenStorage.forceRefreshTokens).toHaveBeenCalledTimes(1);
       expect(mockMCPOAuthHandler.initiateOAuthFlow).toHaveBeenCalledTimes(1);
