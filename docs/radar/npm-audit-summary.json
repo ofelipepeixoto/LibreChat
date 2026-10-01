@@ -1,0 +1,98 @@
+{
+  "checked_at_utc": "2026-10-01",
+  "upstream_commit": "f10b1d91f1eee3a2c82d5247bf620351486b7c1b",
+  "command": "npm audit --package-lock-only --ignore-scripts --json",
+  "node": "24.19.0",
+  "npm": "11.9.0",
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 6,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 6
+    },
+    "dependencies": {
+      "prod": 1772,
+      "dev": 1312,
+      "optional": 189,
+      "peer": 35,
+      "peerOptional": 0,
+      "total": 3158
+    }
+  },
+  "packages": [
+    {
+      "name": "browserify-sign",
+      "severity": "low",
+      "direct": false,
+      "range": ">=2.4.0",
+      "advisories": [],
+      "via_packages": [
+        "elliptic"
+      ]
+    },
+    {
+      "name": "create-ecdh",
+      "severity": "low",
+      "direct": false,
+      "range": "*",
+      "advisories": [],
+      "via_packages": [
+        "elliptic"
+      ]
+    },
+    {
+      "name": "crypto-browserify",
+      "severity": "low",
+      "direct": false,
+      "range": ">=3.4.0",
+      "advisories": [],
+      "via_packages": [
+        "browserify-sign",
+        "create-ecdh"
+      ]
+    },
+    {
+      "name": "elliptic",
+      "severity": "low",
+      "direct": true,
+      "range": "*",
+      "advisories": [
+        {
+          "title": "Elliptic Uses a Cryptographic Primitive with a Risky Implementation",
+          "url": "https://github.com/advisories/GHSA-848j-6mx2-7j84",
+          "range": "<=6.6.1"
+        }
+      ],
+      "via_packages": []
+    },
+    {
+      "name": "node-stdlib-browser",
+      "severity": "low",
+      "direct": false,
+      "range": "*",
+      "advisories": [],
+      "via_packages": [
+        "crypto-browserify"
+      ]
+    },
+    {
+      "name": "vite-plugin-node-polyfills",
+      "severity": "low",
+      "direct": true,
+      "range": ">=0.3.0",
+      "advisories": [],
+      "via_packages": [
+        "node-stdlib-browser"
+      ]
+    }
+  ],
+  "limits": [
+    "Lockfile audit only; packages not installed.",
+    "Runtime reachability not established.",
+    "Container images and external RAG/admin services not scanned.",
+    "Not a penetration test or full application advisory inventory."
+  ]
+}
