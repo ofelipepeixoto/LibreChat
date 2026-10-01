@@ -85,3 +85,26 @@ describe('Dropdown shape', () => {
     expect(trigger()).not.toHaveClass('rounded-theme-control-round');
   });
 });
+
+describe('Dropdown ink', () => {
+  const trigger = (variant?: 'field') => {
+    render(<Dropdown value="24h" options={OPTIONS} ariaLabel="Clock" variant={variant} />);
+    return screen.getByRole('combobox');
+  };
+
+  it('keeps the field ink on a field trigger in every state', () => {
+    const field = trigger('field');
+
+    expect(field).toHaveClass('text-field-text');
+    expect(field).not.toHaveClass('text-text-primary');
+    expect(field).not.toHaveClass('hover:text-text-primary');
+    expect(field).not.toHaveClass('disabled:hover:text-text-primary');
+  });
+
+  it('keeps the primary ink and its hover on a default trigger', () => {
+    const plain = trigger();
+
+    expect(plain).toHaveClass('text-text-primary', 'hover:text-text-primary');
+    expect(plain).not.toHaveClass('text-field-text');
+  });
+});
